@@ -2,17 +2,14 @@
 
 #define MAXVAL 100
 #define NUMBER '0'
-#define BUFSIZE 100
 
 void push(double);
 double pop(void);
 int getop(char[]);
-void ungetch(int);
 
 int sp = 0;
 double val[MAXVAL];
-int buf[BUFSIZE];
-int bufp = 0;
+int last_read_char;
 
 main()
 {
@@ -37,7 +34,7 @@ main()
 				break;
 		}
 	}
-
+	
 	return 0;
 }
 
@@ -68,17 +65,19 @@ double pop(void)
 
 int getop(char s[])
 {
-	int i, c;
+	int i = 0;
 
-	while ((s[0] = c = getch()) == ' ');
+	while ((s[i] = get_next_char()) == ' ');
 
-	s[1] = '\0';
+	if (!isdigit(s[i]))
+	{
+		return s[i];
+	}
 
-	i = 0;
-	while (isdigit(s[++i] = c = getch()));
+	while (isdigit(s[++i] = get_next_char()));
 
+	last_read_char = s[i];
 	s[i] = '\0';
-	ungetch(c);
 
 	return NUMBER;
 }
@@ -88,13 +87,16 @@ int isdigit(char c)
 	return c >= '0' && c <= '9';
 }
 
-int getch(void)
+int get_next_char()
 {
-	return (bufp > 0) ? buf[--bufp] : getchar();
+	if (last_read_char)
+	{
+		int ret = last_read_char;
+		last_read_char = 0;
+		return ret;
+	}
+	else
+	{
+		return getchar();
+	}
 }
-
-void ungetch(int c)
-{
-	buf[bufp++] = c;
-}
-
